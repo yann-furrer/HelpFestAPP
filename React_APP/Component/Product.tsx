@@ -1,4 +1,5 @@
 import React, { Component, useState } from "react";
+import { AntDesign } from '@expo/vector-icons';
 import {
   View,
   Text,
@@ -11,21 +12,21 @@ import {
   TextInput,
 } from "react-native";
 
-class Cate extends React.Component {
-  state = {
-    quantity: 0,
-  };
- Show_qr() {
-    return(
-      <View>
-      <SvgQRCode value="http://example.com" />
-      <Text>jhiu</Text>
+class Product extends React.Component {
+    constructor(props) {
+        super(props);
+      
+        this.state = {
+        
+          quantity: 0
+        };
+        console.log(props);
+      }  
 
-      </View>
-
-    );
+  back () {
+    this.props.navigation.navigate('Home') 
   }
-
+  
   count_less = () => {
     if (this.state.quantity <= 0) {
     } else {
@@ -60,15 +61,19 @@ class Cate extends React.Component {
     return (
       <React.Fragment>
         <View style={{ flexDirection: "column" }}>
-          <Image
-            style={{ zIndex: 2, width: 40, height: 30 }}
-            source={{ uri: "https://reactnative.dev/img/tiny_logo.png" }}
-          />
+            <TouchableOpacity style={styles.goback}
+             onPress={() => this.back()}>
+                <View>
+                <AntDesign name="arrowleft" size={30} color="white" style={{zIndex: 1, paddingLeft:20, marginTop: 29}}/>
+                    <Text></Text>
+                </View>
+            </TouchableOpacity>
+    
           <Text
             style={{
               color: "white",
               zIndex: 1,
-              marginTop: 40,
+              
               fontSize: 30,
               marginLeft: 20,
             }}
@@ -127,7 +132,7 @@ class Cate extends React.Component {
               backgroundColor: "black",
               borderRadius: 16,
               marginLeft: 23,
-              marginTop: 170
+              marginTop: 140
             }}
           >
 
@@ -149,7 +154,7 @@ class Cate extends React.Component {
 }
 const styles = StyleSheet.create({
   circle: {
-    marginTop: -300,
+    marginTop: -320,
     alignSelf: "center",
     backgroundColor: "black",
     width: 500,
@@ -201,6 +206,9 @@ const styles = StyleSheet.create({
     height: 52,
     borderRadius: 10,
   },
+  goback:{
+      zIndex: 1
+  }
 });
 
-export default Cate;
+export default Product;

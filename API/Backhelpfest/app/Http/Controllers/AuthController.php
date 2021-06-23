@@ -10,10 +10,9 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
    public function register(Request $request) {
-       $fields = $request->validate([
+        $fields = $request->validate([
            'username' => 'required|string',
            'password' => 'required|string|confirmed'
-           
        ]);
       $user = User::create([
           'username' => $fields['username'],
