@@ -19,6 +19,8 @@ class CreateUsersTable extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
+            $table->unsignedBigInteger('tente_id');
+            $table->foreign('tente_id')->references('id')->on('tente');
         });
     }
 

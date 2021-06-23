@@ -13,7 +13,7 @@ class CreateCommandTable extends Migration
      */
     public function up()
     {
-        Schema::create('command', function (Blueprint $table) {
+        Schema::create('commands', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('product_id');
             $table->unsignedBigInteger('users_id');
@@ -21,10 +21,10 @@ class CreateCommandTable extends Migration
             $table->boolean('statut');
             $table->integer('price');
             $table->dateTime('date');
-
             $table->foreign('users_id')->references('id')->on('users');
             $table->foreign('tente_id')->references('id')->on('tente');
-            $table->foreign('product_id')->references('id')->on('product');
+            $table->foreign('product_id')->references('id')->on('products');
+            $table->timestamps('false');
         });
     }
 
@@ -35,6 +35,6 @@ class CreateCommandTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('command');
+        Schema::dropIfExists('commands');
     }
 }
