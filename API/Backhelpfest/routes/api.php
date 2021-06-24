@@ -12,6 +12,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\BoutonController;
 use App\Http\Controllers\TenteController;
 use App\Http\Controllers\QrcodeController;
+use Illuminate\Support\Facades\DB;
 
 
 
@@ -52,11 +53,9 @@ Route::post('addcommand', [AddcommandController::class, 'addCommand']);
 
 Route::get('qrcode', [UserController::class, 'index', 'show']);
 
-Route::get('product', [ProduitallController::class, 'index', 'show']);
-
 // Routes apiResource 
 
-Route::apiResource('produit', ProduitallController::class);
+Route::apiResource('product', ProduitallController::class);
 
 Route::apiResource('command', CommandController::class);
 
@@ -66,3 +65,32 @@ Route::apiResource('tente', TenteController::class);
 
 Route::apiResource('statut', BoutonController::class);
 
+
+
+
+
+
+Route::get('/produit/search/{search}', function ($search) {
+
+    try {
+        $produits = DB::table('Products')->where('name', 'like', '%' . $search . '%')->get();
+        return $produits;
+       
+    }catch (PDOException $e) {
+        $error = ['error' => ['message' => "Ressource not found"]];
+        return response()->json($error, 404);
+    }
+});
+
+Route::get('/statut', function($status){
+    
+    try { 
+        $statut = DB::table('Commands')->where('statut', 'like', '0' . $status )->get();
+        return $statut;
+
+    }catch (PDOException $e) {
+        $error = ['error' => ['message' => "Ressource not found"]];
+        return response()->json($error, 404);
+    }
+
+});
