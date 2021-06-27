@@ -10,16 +10,18 @@ import {
   StatusBar,
   Modal,
   Button,
+  ScrollView
 } from "react-native";
 import { Entypo } from "@expo/vector-icons";
-import SvgQRCode from 'react-native-qrcode-svg';
+import QRCode from 'react-native-qrcode-svg';
 
 export default class Home extends React.Component {
   state = {
     search: "",
+    point: 0,
+    array_of_product: {},
     modalVisible: false,
   };
-
   getToken = async () => {
     try {
       let result = await AsyncStorage.getItem("token");
@@ -28,114 +30,73 @@ export default class Home extends React.Component {
       console.log(e);
     }
   };
-
-  updateSearch = (search) => {
+  
+  updateSearch = async(search) => {
     this.setState({ search });
     console.log(search);
+    console.log(this.state.array_of_product)
+
+    try {
+      let response = await fetch(
+        'http://172.104.156.69:8000/api/product'
+        );
+        let json = await response.json();
+        let array_of_product = json
+        this.setState({ array_of_product: array_of_product });
+        console.log(this.state.array_of_product);
+      
+        
+      } catch (error) {
+        console.error(error);
+      }
   };
-
-  render() {
-    const { search } = this.state;
-    const { modalVisible } = this.state;
-    return (
-      <React.Fragment>
-        {/* <View>
-       <View style={{flexDirection: "row"}}>
-        <TextInput
-          style={styles.searchbar}
-          placeholder="rechercher"
-          onChangeText={this.updateSearch}
-          value={search}
-        />
-
-
-        <TouchableOpacity
-        onPress={() => {this.setState({modalVisible: true})}}
-            style={styles.qr_button}
-          >
-            <Image
-            style={{
-              width: 29,
-              height: 29,
-              alignSelf: "center",
-              marginTop: 5,
-              zIndex: 2
-            }}
-           source={require('../assets/qr-code.png')}
-          />
-          </TouchableOpacity>
-          </View>
-
-       
-          </View>
-          <Image
-          style={{width: 260, height: 130, zIndex: 2}}
-          source={require('../assets/treasure.png')}
-          />
-        <View style={styles.circle}></View>
-
-
-        <View style={styles.category}>
-          <TouchableOpacity
-          onPress={() => {this.setState({modalVisible: false})}}
-              style={styles.category_p}
-            >
-              <Image
-              style={{
-                width: 40,
-                height: 40,
-                alignSelf: "center",
-                marginTop: 9,
-              }}
-              source={require('../assets/juice.png')}
-            />
-            <Text style={{color: "black",textAlign: "center", fontSize: 15}}>Déjeuner</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-            onPress={() => {this.schow_qr();}}
-                style={styles.category_p}
-              >
-                <Image
-                style={{
-                  width: 40,
-                  height: 40,
-                  alignSelf: "center",
-                  marginTop: 9,
-                }}
-                source={require('../assets/snack.png')}/>
-              <Text style={{color: "black",textAlign: "center", fontSize: 15}}>Plat</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-
-              onPress={() => {this.schow_qr();}}
-                  style={styles.category_p}
-                >
-                  <Image
-                  style={{
-                    width: 40,
-                    height: 40,
-                    alignSelf: "center",
-                    marginTop: 9,
-                  }}
-                  source={require('../assets/alcool.png')}
-                />
-                <Text style={{color: "black",textAlign: "center", fontSize: 13}}>- 18</Text>
-                </TouchableOpacity>
-                </View> */}
-        <View style={{flexDirection: "row"}}>
+  
+  
+  SchowProduct =  async () => {
+    
+ 
+    try {
+      let response = await fetch(
+        'http://172.104.156.69:8000/api/product'
+        );
+        let json = await response.json();
+        let array_of_product = json
+        this.setState({ array_of_product: array_of_product });
+        console.log(this.state.array_of_product);
+      
+        
+      } catch (error) {
+        console.error(error);
+      }
+      
+      
+    };
+    
+   
+    
+    
+    
+    
+    render() {
+      const { search } = this.state;
+      const { modalVisible } = this.state;
+      return (
+        <React.Fragment>
+      
+        <View style={{ flexDirection: "row" }}>
           <TextInput
             style={styles.searchbar}
             placeholder="rechercher"
             onChangeText={this.updateSearch}
             value={search}
-          />
+            />
 
           <TouchableOpacity
             onPress={() => {
               this.setState({ modalVisible: true });
             }}
             style={styles.qr_button}
-          >
+            >
             <Image
               style={{
                 width: 29,
@@ -146,26 +107,57 @@ export default class Home extends React.Component {
                 zIndex: 2,
               }}
               source={require("../assets/g1173.png")}
-            />
+              />
           </TouchableOpacity>
         </View>
         <View style={styles.show_coin}>
-            <Text style={{ color: "white", fontSize: 23 }}>Vous avez 12</Text>
-            <Image
-              style={{ height: 40, width: 40, zIndex: 2 }}
-              source={require("../assets/ruby.png")}
+          <Text style={{ color: "white", fontSize: 23 }}>Vous avez {this.state.point}</Text>
+          <Image
+            style={{ height: 40, width: 40, zIndex: 2 }}
+            source={require("../assets/ruby.png")}
             />
-          </View>
+        </View>
         <Image
-        style={{  
-          width: 300,
-          height: 100,
-          zIndex: 2,
-          alignSelf: "center",
-          marginTop: 20,}}
-        source={require("../assets/treasure.png")}
-        />
+          style={{
+            width: 300,
+            height: 100,
+            zIndex: 2,
+            alignSelf: "center",
+            marginTop: 20,
+          }}
+          source={require("../assets/treasure.png")}
+          />
         <View style={styles.circle}></View>
+              <Modal transparent={true} visible={this.state.modalVisible}>
+                <View
+                  style={{
+                    backgroundColor: "white",
+                    width: 250,
+                    height: 260,
+                    alignSelf: "center",
+                    marginTop: 200,
+                    borderRadius: 20,
+                    borderWidth: 1,
+                    borderColor: "black",
+                  }}
+                  >
+                  <View style={{ alignSelf: "center", marginTop: 72 }}>
+                  <QRCode
+              value="le qrcode c une idée de merde"
+              />
+                    <Button
+                      title="fermer"
+                      onPress={() => {
+                        this.SchowProduct();
+                        this.setState({ modalVisible: false });
+                      }}
+                      />
+                    <Text>{modalVisible}</Text>
+                  </View>
+                </View>
+              </Modal>
+          <ScrollView>
+        <View style={{flexWrap: "wrap", flexDirection: "row", flex: 1}}>
         <View style={styles.card}>
           <Image
             style={{
@@ -174,40 +166,80 @@ export default class Home extends React.Component {
               alignSelf: "center",
               marginTop: 7,
               zIndex: 2,
-              borderRadius: 12
+              borderRadius: 12,
+            }}
+            // source={{ uri: "https://reactnative.dev/img/tiny_logo.png" }}
+            source={require("../assets/poulet-satay-recette-malaisienne-1.jpg")}
+            />
+
+          <View
+            style={{ justifyContent: "space-between", flexDirection: "row" }}
+            >
+            <Text style={{ marginLeft: 9, fontSize: 19 }}>titre</Text>
+            <Text style={{ marginRight: 9, fontSize: 19 }}>13 €</Text>
+          </View>
+        </View>
+          <TouchableOpacity
+        onPress={() => {
+          this.props.navigation.navigate("Panier");}}
+        >
+        <View style={styles.card}>
+          <Image
+            style={{
+              width: 120,
+              height: 120,
+              alignSelf: "center",
+              marginTop: 7,
+              zIndex: 2,
+              borderRadius: 12,
+            }}
+            // source={{ uri: "https://reactnative.dev/img/tiny_logo.png" }}
+            source={require("../assets/poulet-satay-recette-malaisienne-1.jpg")}
+            />
+
+          <View
+            style={{ justifyContent: "space-between", flexDirection: "row" }}
+            >
+            <Text style={{ marginLeft: 9, fontSize: 19 }}>titre</Text>
+            <Text style={{ marginRight: 9, fontSize: 19 }}>13 €</Text>
+          </View>
+        </View>
+              </TouchableOpacity>
+        <View style={styles.card}>
+          <Image
+            style={{
+              width: 120,
+              height: 120,
+              alignSelf: "center",
+              marginTop: 7,
+              zIndex: 2,
+              borderRadius: 12,
+            }}
+            // source={{ uri: "https://reactnative.dev/img/tiny_logo.png" }}
+            source={require("../assets/poulet-satay-recette-malaisienne-1.jpg")}
+            />
+
+          <View
+            style={{ justifyContent: "space-between", flexDirection: "row" }}
+            >
+            <Text style={{ marginLeft: 9, fontSize: 19 }}>titre</Text>
+            <Text style={{ marginRight: 9, fontSize: 19 }}>13 €</Text>
+          </View>
+        </View>
+        <View style={styles.card}>
+          <Image
+            style={{
+              width: 120,
+              height: 120,
+              alignSelf: "center",
+              marginTop: 7,
+              zIndex: 2,
+              borderRadius: 12,
             }}
             // source={{ uri: "https://reactnative.dev/img/tiny_logo.png" }}
             source={require("../assets/poulet-satay-recette-malaisienne-1.jpg")}
           />
 
-          <Modal transparent={true} visible={this.state.modalVisible}>
-            <View
-              style={{
-                backgroundColor: "white",
-                width: 250,
-                height: 260,
-                alignSelf: "center",
-                marginTop: 200,
-                borderRadius: 20,
-                borderWidth: 1,
-                borderColor: "black",
-              }}
-            >
-              <View style={{ alignSelf: "center", marginTop: 72 }}>
-                {/* <QRCode
-
-                value="201"
-                /> */}
-                <Button
-                  title="fermer"
-                  onPress={() => {
-                    this.setState({ modalVisible: false });
-                  }}
-                />
-                <Text>{modalVisible}</Text>
-              </View>
-            </View>
-          </Modal>
           <View
             style={{ justifyContent: "space-between", flexDirection: "row" }}
           >
@@ -215,6 +247,8 @@ export default class Home extends React.Component {
             <Text style={{ marginRight: 9, fontSize: 19 }}>13 €</Text>
           </View>
         </View>
+        </View>
+        </ScrollView>
       </React.Fragment>
     );
   }
@@ -231,6 +265,7 @@ const styles = StyleSheet.create({
     height: "100%",
     borderRadius: 500,
     zIndex: 0,
+    
   },
   searchbar: {
     borderWidth: 1,

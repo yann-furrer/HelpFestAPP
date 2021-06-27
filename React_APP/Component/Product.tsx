@@ -17,11 +17,28 @@ class Product extends React.Component {
         super(props);
       
         this.state = {
-        
+          object_of_product: {},
           quantity: 0
         };
-        console.log(props);
+       
       }  
+
+  fetch_product = async() => {
+
+    try {
+      let response = await fetch(
+        'http://172.104.156.69:8000/api/product'
+        );
+        let json = await response.json();
+        let array_of_product = json
+        this.setState({ object_of_product: array_of_product });
+        console.log(this.object_of_product);
+      
+        
+      } catch (error) {
+        console.error(error);
+      }
+  };
 
   back () {
     this.props.navigation.navigate('Home') 
@@ -56,7 +73,7 @@ class Product extends React.Component {
     //     </View>
 
     //   )
-    //}
+    // }
     const { quantity } = this.state;
     return (
       <React.Fragment>
