@@ -1,45 +1,91 @@
 import React from "react";
 import { View } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
+import "react-native-gesture-handler";
+import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import Home from "./Component/Home";
 import Product from "./Component/Product";
 import Register from "./Component/auth/Register";
 import Login from "./Component/auth/Login";
-import Panier from "./Component/Panier"
-
+import Panier from "./Component/Panier";
+import Bluetooth from "./Component/Bluetooth";
+import { useReducer } from "react";
 
 const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
 
 export default class App extends React.Component {
-  state = {
-    IsLongin: true,
-    token: "ok",
-  };
- 
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      IsLongin: true,
+      tokenAPP: null,
+      cart: [],
+      user: "ok"
+    };
+    // this.send_Data();
+    this.UpdateToken();
+  }
+  // this.setState({ object_of_product: object_of_product });
+  UserFetch = async () => {
+    try {
+      let response = await fetch(`http://172.104.156.69:8000/api/infoUser/${this.state.user}`);
+      let json = await response.json();
+      let array_of_product = json;
+      this.setState({ array_of_product: array_of_product });
+      console.log(this.state.array_of_product);
+    } catch (error) {
+      console.error(error);
+    }
+
+
+  }
+
+
   storeToken = async (tokenValue) => {
     try {
       await AsyncStorage.setItem("token", tokenValue);
-      this.setState({ token: tokenValue });
-      console.log("app", this.state.token);
+
+      this.setState({ tokenAPP: tokenValue });
+      console.log("je suis dans app",this.state.tokenAPP);
+      return tokenValue;
     } catch (e) {
       console.log(e);
     }
   };
 
-  HomeTabs() {
+  UpdateToken = async () => {Comment
+    try {
+      const value = await AsyncStorage.getItem("token");
+      if (value !== null) {
+        this.setState({ tokenAPP: value });
+        console.log("getdata", this.state.tokenAPP);
+      }
+    } catch (e) {
+      // error reading value
+    }
+  };
+
+  HomeStack = () => {
     return (
-      <Tab.Navigator>
-        <Tab.Screen name="Notifications" component={Register} />
-      </Tab.Navigator>
+      <Stack.Navigator screenOptions={{headerShown: false}}>
+          <Stack.Screen 
+        name="Home" 
+        component={Home}
+        />
+        <Stack.Screen 
+        name="Product" 
+        initialParams={{ id: 0, onAddProduct: selectedProduct => this.setState({cart: [...this.state.cart, selectedProduct]})} } 
+        component={Product}
+        />
+      </Stack.Navigator>
     );
   }
-  refreshPage() {
-    window.location.reload(false);
-  }
-  Login = () => {
-    if (this.state.token != null) {
+
+  NavigatorTab = () => {
+    if (this.state.tokenAPP != null) {
       return (
         <Tab.Navigator
           screenOptions={({ route }) => ({
@@ -52,7 +98,6 @@ export default class App extends React.Component {
                 iconName = focused ? "caretup" : "leftcircle";
               } else if (route.name === "Panier") {
                 iconName = focused ? "caretup" : "leftcircle";
-                
               }
 
               // You can return any component that you like here!
@@ -64,10 +109,10 @@ export default class App extends React.Component {
             inactiveTintColor: "gray",
           }}
         >
-          <Tab.Screen name="Home" component={Home} />
-          <Tab.Screen name="Settings" component={Product} />
-          <Tab.Screen name="Panier" component={Panier} />
-        
+          <Tab.Screen name="HomeStack" component={this.HomeStack} />
+          {/* <Tab.Screen name="Settings" component={() => <Product {}  /> */}
+          <Tab.Screen name="Panier" children={() => <Panier cart={this.state.cart} />} />
+          <Tab.Screen name="Bluetooth" component={() => <Bluetooth UnLogged={token => { this.setState({tokenAPP: token})}} />} />
         </Tab.Navigator>
       );
     } else {
@@ -81,7 +126,7 @@ export default class App extends React.Component {
                 iconName = focused ? "stepforward" : "verticleright";
               } else if (route.name === "Login") {
                 iconName = focused ? "stepforward" : "verticleright";
-              } 
+              }
 
               // You can return any component that you like here!
               return <AntDesign name={iconName} size={size} color={color} />;
@@ -92,15 +137,17 @@ export default class App extends React.Component {
             inactiveTintColor: "gray",
           }}
         >
-          <Tab.Screen name="Register" component={Register} />
-          <Tab.Screen name="Login" component={Login} />
+          <Tab.Screen name="Register"  children={() => <Register  onUserRegister={token => { this.setState({tokenAPP: token} )}} /> } />
+          <Tab.Screen name="Login" children={() => <Login  onUserLogged={token => { this.setState({tokenAPP: token})}} /> }/>
+          {/* // () => <Login onUserLogged={(token) => { this.setState({tokenAPP: token})}} /> */}
         </Tab.Navigator>
       );
     }
   };
 
+
   render() {
-    return <NavigationContainer>{this.Login()}</NavigationContainer>;
+    return <NavigationContainer>{this.NavigatorTab()}</NavigationContainer>;
   }
 }
 

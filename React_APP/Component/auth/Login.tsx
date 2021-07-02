@@ -10,6 +10,10 @@ import {
 import { AntDesign } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+interface Props {
+  onUserLogged: () => void
+}
+
 export default class Login extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
@@ -18,21 +22,23 @@ export default class Login extends React.Component<Props, State> {
           password: "",
           tokenlog: this.props.token
         };
-        this.send_Data();
+        // this.send_Data();
+
+        this.onUserLogged = props.onUserLogged.bind(this)
       }
     
       updateSearch = (password) => {
         this.setState({ password });
-        console.log(paswword);
+        console.log(password);
       };
 
       send_Data = () => {
             
-          fetch("http://127.0.0.1:8000/api/login", {
+          fetch("http://172.104.156.69:8000/api/login", {
             method: "POST",
             headers: {
               Accept: "application/json",
-              Authorization: "Bearer " + this.state.tokenlog,
+              // Authorization: "Bearer " + this.state.tokenlog,
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
@@ -42,13 +48,38 @@ export default class Login extends React.Component<Props, State> {
           })
             .then((response) => response.json())
             .then((data) => {
-              this.setState({ token: data.token });
+              // this.setState({ token: data.token });
+              this.onUserLogged(data.token)
             })
             .catch(function(error) {
-                console.log('There has been a problem with your fetch operation: ' + error.message);
+                console.log('There has beonUserLoggeden a problem with your fetch operation: ' + error.message);
                  // ADD THIS THROW error
                   throw error;
                 });
+      };
+
+      storeToken = async (tokenValue) => {
+        try {
+          await AsyncStorage.setItem("token", tokenValue);
+    
+          this.setState({ tokenAPP: tokenValue });
+          console.log("je suis dans app",this.state.tokenAPP);
+          return tokenValue;
+        } catch (e) {
+          console.log(e);
+        }
+      };
+    
+      UpdateToken = async () => {
+        try {
+          const value = await AsyncStorage.getItem("token");
+          if (value !== null) {
+            this.setState({ tokenAPP: value });
+            console.log("getdata", this.state.tokenAPP);
+          }
+        } catch (e) {
+          // error reading value
+        }
       };
     
 
@@ -80,7 +111,7 @@ export default class Login extends React.Component<Props, State> {
           />
 
           <Text
-            onPress={() => Alert.alert("simple button pressed")}
+            onPress={() => this.props.navigation.navigate("Register")}
             style={{ color: "#E4D6A7", marginLeft: 30, marginTop: 10 }}
           >
             s'inscrire
@@ -94,6 +125,15 @@ export default class Login extends React.Component<Props, State> {
           >
             <Text style={{ textAlign: "center", marginTop: 11 }}>
               Se connecter
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.valid_button}
+            onPress={() =>this.onUserLogged("fake_token")}
+          >
+            <Text style={{ textAlign: "center", marginTop: 11 }}>
+              CHEAT Se connecter
             </Text>
           </TouchableOpacity>
         </View>

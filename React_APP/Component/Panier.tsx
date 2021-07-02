@@ -14,11 +14,82 @@ import {
 import { AntDesign } from "@expo/vector-icons";
 
 export default class Panier extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      shoppingCart: [],
+      coin: 0,
+      username: "t",
+      usertable: []
+    };
+  }
+ async componentDidMount(){
+  try {
+    let response = await fetch(`http://172.104.156.69:8000/api/infoUser/${this.state.username}`);
+    let usertable = await response.json();
+    
+    this.setState({ usertable: usertable });
+    console.log(this.state.usertable, "az");
+    
+  } catch (error) {
+    console.error(error);
+  }
+
+}
+  
+  getToken = async () => {
+    try {
+      let result = await AsyncStorage.getItem("username");
+      await this.setState({username : result})
+      console.log("je recup de la data bg ", this.state.username);
+    } catch (e) {
+      console.log(e);
+    }
+  };
   back() {
     this.props.navigation.navigate("Home");
   }
 
+  cart_function() {
+    return this.props.cart.map((product, index) => {
+      return (
+        <View style={styles.loop_food} key={index}>
+          <Image
+            style={{
+              width: 60,
+              height: 60,
+              marginLeft: 12,
+              marginTop: 9,
+            }}
+            source={{uri:(product.image)}}
+          />
+          <Text style={{ marginLeft: 13 }}>{product.name}</Text>
+          <View style={{ flexDirection: "column", marginLeft: 28 }}>
+            <Text style={{ fontSize: 18 }}>quantité</Text>
+            <Text style={{ alignSelf: "center" }}>2</Text>
+          </View>
+          <View style={{ flexDirection: "column", marginLeft: 39 }}>
+            <Text style={{ fontSize: 18 }}>Prix</Text>
+            <Text style={{ alignSelf: "center" }}>{product.price} €</Text>
+          </View>
+        </View>
+      );
+    });
+  }
+
+  // storeCart = async (shoppingCart) => {
+  //   try {
+
+  //     await AsyncStorage.setItem('panier', shoppingCart)
+  //     console.log("je recup de la data", shopppingCart)
+  //   } catch (e) {
+  //     console.log(e)
+  //   }
+  // }
+
   render() {
+    console.log("cringe", this.props.cart);
     return (
       <React.Fragment>
         <View style={styles.inside_circle}>
@@ -48,7 +119,9 @@ export default class Panier extends React.Component {
           </View>
 
           <View style={styles.show_coin}>
-            <Text style={{ color: "white", fontSize: 23 }}>Vous avez 12</Text>
+            <Text style={{ color: "white", fontSize: 23 }}>
+              Vous avez {this.state.usertable["coin"]}
+            </Text>
             <Image
               style={{ height: 40, width: 40, zIndex: 2 }}
               source={require("../assets/ruby.png")}
@@ -66,26 +139,8 @@ export default class Panier extends React.Component {
           source={require("../assets/treasure.png")}
         />
         <View style={styles.circle}></View>
-        <View style={styles.loop_food}>
-          <Image
-            style={{
-              width: 60,
-              height: 60,
-              marginLeft: 12,
-              marginTop: 9,
-            }}
-            source={require("../assets/qr-code.png")}
-          />
-          <Text style={{ marginLeft: 13,  }}>Poulet Saté</Text>
-          <View style={{ flexDirection: "column", marginLeft: 28 }}>
-            <Text style={{fontSize: 18}}>quantité</Text>
-            <Text style={{ alignSelf: "center" }}>2</Text>
-          </View>
-          <View style={{ flexDirection: "column", marginLeft: 39 }}>
-            <Text style={{fontSize: 18}}>Prix</Text>
-            <Text style={{ alignSelf: "center" }}>12 €</Text>
-          </View>
-        </View>
+        {this.cart_function()}
+       
         <View style={styles.total}>
           <Text
             style={{

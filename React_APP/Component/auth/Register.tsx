@@ -8,8 +8,15 @@ import {
   TextInput,
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+interface Props {
+  onUserRegister: () => void
+}
+
 export default class Register extends React.Component<Props, State> {
+
+
+  
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -17,36 +24,23 @@ export default class Register extends React.Component<Props, State> {
       password: "",
       password_confirmation: "",
       token: "",
+      tente_id: "",
     };
     // this.send_Data();
-    this.UpdateToken();
+    this.onUserRegister = props.onUserRegister.bind(this)
   }
-  
-  storeToken = async (tokenValue) => {
+
+  storeToken = async (tokenValue, username) => {
     try {
-      
-      await AsyncStorage.setItem('token', tokenValue)
-      console.log("je recup de la data", tokenValue)
+      await AsyncStorage.setItem("token", tokenValue);
+      await AsyncStorage.setItem("username", username);
+      console.log("je recup de la data", tokenValue, username);
     } catch (e) {
-      console.log(e)
+      console.log(e);
     }
-  }
+  };
+
   
- 
-  UpdateToken = async () => {
-    try {
-      const value = await AsyncStorage.getItem('token')
-    if(value !== null) {
-     this.setState({token: value})
-     console.log("getdata", this.state.token)
-    }
-  } catch(e) {
-    // error reading value
-  }
-}
-
-
-
 
   Password = (password) => {
     this.setState({ password });
@@ -56,14 +50,19 @@ export default class Register extends React.Component<Props, State> {
     this.setState({ id_log });
     console.log(id_log);
   };
+
+  IDtente = (tente_id:string) => {
+    console.log(tente_id);
+    this.setState({ tente_id: parseInt(tente_id) });
+  };
+
   Password_confimartion = (password_confirmation) => {
     this.setState({ password_confirmation });
     console.log(password_confirmation);
   };
-  
 
   send_Data = () => {
-    fetch("http://127.0.0.1:8000/api/register", {
+    fetch("http://172.104.156.69:8000/api/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -72,11 +71,14 @@ export default class Register extends React.Component<Props, State> {
         username: this.state.id_log,
         password: this.state.password,
         password_confirmation: this.state.password_confirmation,
+        tente_id: this.state.tente_id,
       }),
     })
       .then((response) => response.json())
       .then((data) => {
-        this.storeToken(data.token);
+         this.storeToken(data.token, data.user.username);
+        this.onUserRegister(data.token)
+       
       })
       .catch(function (error) {
         console.log(
@@ -85,7 +87,6 @@ export default class Register extends React.Component<Props, State> {
         // ADD THIS THROW error
         throw error;
       });
-      
   };
 
   render() {
@@ -102,7 +103,15 @@ export default class Register extends React.Component<Props, State> {
             onChangeText={this.Id}
             value={this.state.id_log}
             autoCompleteType="off"
-            placeholder="Identifiant tente"
+            placeholder="Identifiant "
+          />
+          <TextInput
+            keyboardType='numeric'
+            style={styles.input1}
+            onChangeText={this.IDtente}
+            value={this.state.tente_id}
+            autoCompleteType="off"
+            placeholder="numéro de tente"
           />
 
           <TextInput
@@ -122,20 +131,20 @@ export default class Register extends React.Component<Props, State> {
             placeholder="confirmation du mot de passe"
             autoCompleteType="password"
           />
-          
+
           <Text
             onPress={() => {
               this.props.navigation.navigate("Login");
             }}
             style={{ color: "#E4D6A7", marginLeft: 30 }}
-            >
+          >
             se connecter
           </Text>
-            <Text>{this.state.token}</Text>
+          <Text>{this.state.token}</Text>
 
           <TouchableOpacity
             style={styles.valid_button}
-            onPress={() => this.send_Data()}  
+            onPress={() => this.send_Data()}
           >
             <Text style={{ textAlign: "center", marginTop: 11 }}>
               S'inscrire

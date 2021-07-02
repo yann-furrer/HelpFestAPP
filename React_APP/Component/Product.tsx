@@ -1,5 +1,5 @@
-import React, { Component, useState } from "react";
-import { AntDesign } from '@expo/vector-icons';
+import React, { Component, useState, useEffect } from "react";
+import { AntDesign } from "@expo/vector-icons";
 import {
   View,
   Text,
@@ -10,164 +10,195 @@ import {
   PixelRatio,
   Button,
   TextInput,
+ 
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-class Product extends React.Component {
-    constructor(props) {
-        super(props);
+
+const Product = (props) => {
+  //   this.state = {
+  //     object_of_product: [],
+  //     quantity: 0,
+  //     ok: { id: 4, price: "bonjou" },
+  //   };
+  // }
+  // const { id } = route.params;
+  const [object_of_product, setObject] = useState({});
+  const [quantity, setQuantity] = useState(4);
+  const [ok, setOk] = useState("ok");
+
+  console.log(props)
+  
+  useEffect(() => {
+    
+
+  Fetch();
       
-        this.state = {
-          object_of_product: {},
-          quantity: 0
-        };
-       
-      }  
-
-  fetch_product = async() => {
-
-    try {
-      let response = await fetch(
-        'http://172.104.156.69:8000/api/product'
-        );
-        let json = await response.json();
-        let array_of_product = json
-        this.setState({ object_of_product: array_of_product });
-        console.log(this.object_of_product);
       
-        
-      } catch (error) {
-        console.error(error);
-      }
+      
+  }, []);
+
+  function onAddProduct(){
+    // setObject({...object_of_product, "test azerty": "jiji"});
+    // object_of_product.push("ok")
+    props.route.params.onAddProduct( object_of_product )
+  }
+
+
+  function Fetch(){
+
+    fetch(`http://172.104.156.69:8000/api/product/${props.route.params.id}`)
+    .then((response) => response.json())
+    .then((data) =>  setObject(data))
+    // .then(console.log("object of product => ", object_of_product)) 
+    .catch(function (error) {
+      console.log(
+        "There has been a problem with your fetch operation: " + error.message
+      );
+      // ADD THIS THROW error
+      throw error;
+    });
+  };
+  
+  async function deleteToken() {
+   try {
+     await AsyncStorage.removeItem("token");
+     console.log("je sup de la data");
+   } catch (e) {
+     console.log(e);
+   }
   };
 
-  back () {
-    this.props.navigation.navigate('Home') 
-  }
-  
-  count_less = () => {
-    if (this.state.quantity <= 0) {
-    } else {
-      this.setState({
-        quantity: this.state.quantity - 1,
-      });
+ async function UpdateToken(){
+    try {
+      const value = await AsyncStorage.getItem("token");
+      if (value !== null) {
+        setState({ tokenAPP: value });
+        console.log("getdata", tokenAPP);
+      }
+    } catch (e) {
+      // error reading value
     }
   };
 
-  count_more = () => {
-    this.setState({
-      quantity: this.state.quantity + 1,
-    });
-  };
+  // UpdateCart = async () => {
+  //   try {
+  //     const value = await AsyncStorage.getItem("panier");
+  //     if (value !== null) {
+  //       this.setState({ shoppingCart: this.ok });
+  //       console.log("getdata", this.state.shoppingCart[0]);
+  //     }
+  //   } catch (e) {
+  //     // error reading value
+  //   }
+  // };
 
-  render() {
-    // var ingredient = [];
-    // var ok = 4
 
-    // for(let i = 0; i < ok; i++){
+  function count_less() {
+    if (quantity > 0) {
+      setQuantity(quantity - 1);
+    }
+  }
 
-    //   ingredient.push(
+  function count_more() {
+    setQuantity(quantity + 1);
+  }
 
-    //     <View style={{ flexDirection: 'column-reverse',
-    //     justifyContent: 'space-around'}} key = {i} >
-    //     <Text style={styles.loop_square}>ok</Text>
-    //     </View>
+  // const { quantity } = this.state;
+  return (
+    <React.Fragment>
+      <View style={{ flexDirection: "column" }}>
+        <TouchableOpacity style={styles.goback} onPress={() => {props.navigation.navigate("Home")}}>
+          <View>
+            <AntDesign
+              name="arrowleft"
+              size={30}
+              color="white"
+              style={{ zIndex: 1, paddingLeft: 20, marginTop: 29 }}
+            />
+            <Text></Text>
+          </View>
+        </TouchableOpacity>
 
-    //   )
-    // }
-    const { quantity } = this.state;
-    return (
-      <React.Fragment>
-        <View style={{ flexDirection: "column" }}>
-            <TouchableOpacity style={styles.goback}
-             onPress={() => this.back()}>
-                <View>
-                <AntDesign name="arrowleft" size={30} color="white" style={{zIndex: 1, paddingLeft:20, marginTop: 29}}/>
-                    <Text></Text>
-                </View>
-            </TouchableOpacity>
-    
+        <Text
+          style={{
+            color: "white",
+            zIndex: 1,
+
+            fontSize: 30,
+            marginLeft: 20,
+          }}
+        >
+          {object_of_product.name}
+        </Text>
+        <Text
+          style={{
+            color: "#E9B44C",
+            zIndex: 1,
+            fontSize: 30,
+            marginLeft: 20,
+          }}
+        >
+          4,99 €
+        </Text>
+      </View>
+      <View style={styles.circle}></View>
+      <View style={styles.button_fond}>
+        <TouchableOpacity
+          style={styles.less}
+          onPress={() => count_less()}
+        >
+          <Text style={{ fontSize: 30, color: "white", alignSelf: "center" }}>
+            -
+          </Text>
+        </TouchableOpacity>
+        <Text style={{ color: "#E9B44C", fontSize: 27 }}>{quantity}</Text>
+        <TouchableOpacity
+          style={styles.more}
+          onPress={() => {
+            setQuantity(quantity + 1);
+          }}
+        >
+          <Text style={{ fontSize: 30, color: "white", alignSelf: "center" }}>
+            +
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <Button title="Learn More" onPress={() => UpdateCart()} />
+      <Button title="remove toeken" onPress={() => deleteToken()} />
+      <View style={styles.description}>
+        <Text style={{ fontSize: 24, marginBottom: 12, marginLeft: 20 }}>
+          Description
+        </Text>
+        <Text style={{ fontSize: 18, marginLeft: 20, marginRight: 20 }}>
+          {object_of_product.description}
+        </Text>
+        <TouchableOpacity
+          onPress={() => onAddProduct()}
+          style={{
+            width: "85%",
+            height: 41,
+            backgroundColor: "black",
+            borderRadius: 16,
+            marginLeft: 23,
+            marginTop: 140,
+          }}
+        >
           <Text
             style={{
               color: "white",
-              zIndex: 1,
-              
-              fontSize: 30,
-              marginLeft: 20,
+              fontSize: 17,
+              alignSelf: "center",
+              paddingTop: 7,
             }}
           >
-            Hot Dog épicé
+            AJOUTER AU PANIER
           </Text>
-          <Text
-            style={{
-              color: "#E9B44C",
-              zIndex: 1,
-              fontSize: 30,
-              marginLeft: 20,
-            }}
-          >
-            4,99 €
-          </Text>
-        </View>
-        <View style={styles.circle}></View>
-        <View style={styles.button_fond}>
-          <TouchableOpacity
-            style={styles.less}
-            onPress={() => {
-              this.count_less();
-            }}
-          >
-            <Text style={{ fontSize: 30, color: "white", alignSelf: "center" }}>
-              -
-            </Text>
-          </TouchableOpacity>
-          <Text style={{ color: "#E9B44C", fontSize: 27 }}>{quantity}</Text>
-          <TouchableOpacity
-            style={styles.more}
-            onPress={() => {
-              this.count_more();
-            }}
-          >
-            <Text style={{ fontSize: 30, color: "white", alignSelf: "center" }}>
-              +
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.description}>
-          <Text style={{ fontSize: 24, marginBottom: 12, marginLeft: 20 }}>
-            Description
-          </Text>
-          <Text style={{ fontSize: 18, marginLeft: 20, marginRight: 20 }}>
-            Un hot-dog épicé accompagné de sa garniture chaude et goûtue pour
-            régaler vos pauses goûter.
-          </Text>
-          <TouchableOpacity
-            onPress={() => Alert.alert("simple button pressed")}
-            style={{
-              width: "85%",
-              height: 41,
-              backgroundColor: "black",
-              borderRadius: 16,
-              marginLeft: 23,
-              marginTop: 140
-            }}
-          >
-
-            <Text
-              style={{
-                color: "white",
-                fontSize: 17,
-                alignSelf: "center",
-                paddingTop: 7,
-              }}
-            >
-              AJOUTER AU PANIER
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </React.Fragment>
-    );
-  }
+        </TouchableOpacity>
+      </View>
+    </React.Fragment>
+  );
 }
 const styles = StyleSheet.create({
   circle: {
@@ -223,9 +254,9 @@ const styles = StyleSheet.create({
     height: 52,
     borderRadius: 10,
   },
-  goback:{
-      zIndex: 1
-  }
+  goback: {
+    zIndex: 1,
+  },
 });
 
 export default Product;
