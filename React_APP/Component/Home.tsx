@@ -12,7 +12,7 @@ import {
   Button,
   ScrollView,
 } from "react-native";
-import { Entypo } from "@expo/vector-icons";
+
 import QRCode from "react-native-qrcode-svg";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 export default class Home extends React.Component {
@@ -21,112 +21,115 @@ export default class Home extends React.Component {
     point: 0,
     array_of_product: [],
     modalVisible: false,
-    username: "t",
-    usertable: []
+    username: "undefined",
+    usertable: [],
   };
 
- async componentDidMount() {
+  async componentDidMount() {
     this.Fetch();
     this.getToken();
-    
-    try {
-      let response = await fetch(`http://172.104.156.69:8000/api/infoUser/${this.state.username}`);
-      let usertable = await response.json();
-      
-      this.setState({ usertable: usertable });
-      console.log(this.state.usertable, "az");
-      
-    } catch (error) {
-      console.error(error);
-    }
 
+    
   }
-  Fetch = async() => {
+FetchUser = async () => {
+
+  try {
+    let response = await fetch(
+      `http://172.104.156.69:8000/api/infoUser/${this.state.username}`
+    );
+    let usertable = await response.json();
+
+    this.setState({ usertable: usertable });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+  Fetch = async () => {
     try {
       let response = await fetch("http://172.104.156.69:8000/api/product");
       let array_of_product = await response.json();
-      
+
       this.setState({ array_of_product: array_of_product });
-      console.log(this.state.array_of_product, "az");
-      
     } catch (error) {
       console.error(error);
     }
-   }
+  };
 
   getToken = async () => {
     try {
       let result = await AsyncStorage.getItem("username");
-      await this.setState({username : result})
-      console.log("je recup de la data bg ", this.state.username);
+      await this.setState({ username: result });
+      console.log("je suis usernma e", this.state.username)
+      this.FetchUser();
     } catch (e) {
       console.log(e);
     }
   };
+  
 
   updateSearch = async (search) => {
     this.setState({ search });
-    console.log(search);
-    console.log(this.state.array_of_product);
 
     try {
-      let response = await fetch(`http://172.104.156.69:8000/api/product/search/${this.state.search}`);
+      let response = await fetch(
+        `http://172.104.156.69:8000/api/product/search/${this.state.search}`
+      );
       let json = await response.json();
       let array_of_product = json;
       this.setState({ array_of_product: array_of_product });
-      console.log(this.state.array_of_product);
-      if(this.state.search == ""){
-          this.Fetch();
+
+      if (this.state.search == "") {
+        this.Fetch();
       }
     } catch (error) {
       console.error(error);
     }
   };
 
-  
-  
-  
-
-
-    
   SchowProduct = () => {
-    console.log("array of product = "+this.state.array_of_product.length);
-      console.log("i")
-      return this.state.array_of_product.map((product)=>{
-        
-      return(
-        <TouchableOpacity 
-        onPress={() => {
-          this.props.navigation.navigate("Product", {id : product.id});}}
-        >
-        <View style={styles.card} >
-      <Image
-        style={{
-          width: 120,
-          height: 120,
-          alignSelf: "center",
-          marginTop: 7,
-          zIndex: 2,
-          borderRadius: 12,
-        }}
-        // source={{ uri: "https://reactnative.dev/img/tiny_logo.png" }}
-        source={{uri: product.image}}
-        />
+    console.log("usetable : ", this.state.usertable);
 
-      <View style={{ justifyContent: "space-between", flexDirection: "row" }}>
-        <Text style={{ marginLeft: 17, fontSize: 15 }}>{product.name}</Text>
-        <Text style={{ marginRight: 17, fontSize: 12 }}>{product.price}€</Text>
-     
-      </View>
-      </View>
-       </TouchableOpacity>
-    )
-     })
-  }
+    return this.state.array_of_product.map((product, index) => {
+      return (
+        <TouchableOpacity
+          onPress={() => {
+            this.props.navigation.navigate("Product", { id: product.id });
+          }}
+        >
+          <View style={styles.card} key={index}>
+            <Image
+              style={{
+                width: 120,
+                height: 120,
+                alignSelf: "center",
+                marginTop: 7,
+                zIndex: 2,
+                borderRadius: 12,
+              }}
+              // source={{ uri: "https://reactnative.dev/img/tiny_logo.png" }}
+              source={{ uri: product.image }}
+            />
+
+            <View
+              style={{ justifyContent: "space-between", flexDirection: "row" }}
+            >
+              <Text style={{ marginLeft: 17, fontSize: 15 }}>
+                {product.name}
+              </Text>
+              <Text style={{ marginRight: 17, fontSize: 12 }}>
+                {product.price}€
+              </Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+      );
+    });
+  };
 
   render() {
     const { search, modalVisible } = this.state;
-    
+
     return (
       <React.Fragment>
         <View style={{ flexDirection: "row" }}>
@@ -160,6 +163,7 @@ export default class Home extends React.Component {
           <Text style={{ color: "white", fontSize: 23 }}>
             Vous avez {this.state.usertable["coin"]}
           </Text>
+
           <Image
             style={{ height: 40, width: 40, zIndex: 2 }}
             source={require("../assets/ruby.png")}
@@ -179,7 +183,7 @@ export default class Home extends React.Component {
         <Modal transparent={true} visible={this.state.modalVisible}>
           <View
             style={{
-              backgroundColor: "white", 
+              backgroundColor: "white",
               width: 250,
               height: 260,
               alignSelf: "center",
@@ -191,13 +195,18 @@ export default class Home extends React.Component {
           >
             <View style={{ alignSelf: "center", marginTop: 72 }}>
               <QRCode value={this.state.usertable["tente"]} />
-              <Button
+              <TouchableOpacity
                 title="fermer"
                 onPress={() => {
                   this.SchowProduct();
                   this.setState({ modalVisible: false });
                 }}
-              />
+              >
+                <View style={{height: 35, width: 100, backgroundColor: "#9B2915", borderRadius: 4, marginTop: 22}}>
+                  
+                  <Text style={{color: "white", textAlign: "center", marginTop: 5}}>Fermer</Text>
+                </View>
+              </TouchableOpacity>
               <Text>{modalVisible}</Text>
             </View>
           </View>

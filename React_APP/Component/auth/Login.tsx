@@ -110,12 +110,7 @@ export default class Login extends React.Component<Props, State> {
             autoCompleteType="password"
           />
 
-          <Text
-            onPress={() => this.props.navigation.navigate("Register")}
-            style={{ color: "#E4D6A7", marginLeft: 30, marginTop: 10 }}
-          >
-            s'inscrire
-          </Text>
+         
 
           <TouchableOpacity
             style={styles.valid_button}
@@ -145,7 +140,7 @@ const styles = StyleSheet.create({
   top_view: {
     backgroundColor: "white",
     width: "100%",
-    height: "40%",
+    height: "25%",
   },
   bottom_view: {
     backgroundColor: "white",

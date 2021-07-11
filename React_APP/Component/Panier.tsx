@@ -10,9 +10,10 @@ import {
   StatusBar,
   Modal,
   Button,
+  ScrollView
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 export default class Panier extends React.Component {
   constructor(props) {
     super(props);
@@ -21,38 +22,113 @@ export default class Panier extends React.Component {
       shoppingCart: [],
       coin: 0,
       username: "t",
-      usertable: []
+      usertable: [],
+      price_array: [],
     };
   }
- async componentDidMount(){
-  try {
-    let response = await fetch(`http://172.104.156.69:8000/api/infoUser/${this.state.username}`);
-    let usertable = await response.json();
-    
-    this.setState({ usertable: usertable });
-    console.log(this.state.usertable, "az");
-    
-  } catch (error) {
-    console.error(error);
+
+  componentDidMount() {
+    this.getToken();
+    console.log("ok");
+  }
+  SendCommand = async () => {
+
+    try {
+      fetch(`http://172.104.156.69:8000/api/test`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+         
+          command: this.props.cart,
+          user: this.state.usertable,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => console.log("data", data));
+    } catch (error) {
+      console.error(error);
+    }
+
   }
 
-}
-  
+  Command = () => {
+    if (this.state.shoppingCart.length <= 0) {
+      return (
+        <TouchableOpacity
+          style={styles.total}
+          onPress={() => this.SendCommand()}
+        >
+          <Text
+            style={{
+              color: "white",
+              marginTop: 12,
+              fontSize: 23,
+              textAlign: "right",
+              paddingLeft: "30%",
+            }}
+          >
+            Commander
+          </Text>
+        </TouchableOpacity>
+      );
+    }
+  };
+
+  Fetch = () => {
+    try {
+      fetch(`http://172.104.156.69:8000/api/infoUser/${this.state.username}`)
+        .then((response) => response.json())
+        .then((data) => this.setState({ usertable: data }));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   getToken = async () => {
     try {
       let result = await AsyncStorage.getItem("username");
-      await this.setState({username : result})
-      console.log("je recup de la data bg ", this.state.username);
+      await this.setState({ username: result });
+
+      this.Fetch();
     } catch (e) {
       console.log(e);
     }
   };
+
   back() {
     this.props.navigation.navigate("Home");
   }
 
+  total() {
+    // let sum = 0;
+    console.log("total function", this.props.cart.length);
+    let sum = 800;
+    var values = [];
+    var total_price = 0;
+    for (let i = 0; i != this.props.cart.length; i++) {
+      sum = this.props.cart[i].quantity * this.props.cart[i].price;
+      console.log("je passe de le for", i);
+      values.push(sum);
+      const reducer = (accumulator, currentValue) => accumulator + currentValue;
+      total_price = values.reduce(reducer, 0);
+      console.log("total price =>", total_price);
+    }
+
+    return total_price;
+    // const reducer = (accumulator, currentValue) => accumulator + currentValue;
+    // let sum = this.state.price_array.reduce(reducer, 0);
+    // return sum
+  }
+
   cart_function() {
+    //  this.state.price_array.push(add);
+    //  let add = this.props.cart.price *  this.props.cart.quantity
+    //  console.log("price array", this.state.price_array);
     return this.props.cart.map((product, index) => {
+      // console.log("loop total", "product" ,product, "index",index)
+      this.total();
       return (
         <View style={styles.loop_food} key={index}>
           <Image
@@ -62,48 +138,30 @@ export default class Panier extends React.Component {
               marginLeft: 12,
               marginTop: 9,
             }}
-            source={{uri:(product.image)}}
+            source={{ uri: product.image }}
           />
           <Text style={{ marginLeft: 13 }}>{product.name}</Text>
           <View style={{ flexDirection: "column", marginLeft: 28 }}>
             <Text style={{ fontSize: 18 }}>quantité</Text>
-            <Text style={{ alignSelf: "center" }}>2</Text>
+            <Text style={{ alignSelf: "center" }}>{product.quantity}</Text>
           </View>
           <View style={{ flexDirection: "column", marginLeft: 39 }}>
             <Text style={{ fontSize: 18 }}>Prix</Text>
-            <Text style={{ alignSelf: "center" }}>{product.price} €</Text>
+            <Text style={{ alignSelf: "center" }}>
+              {product.price * product.quantity} €
+            </Text>
           </View>
         </View>
       );
     });
   }
 
-  // storeCart = async (shoppingCart) => {
-  //   try {
-
-  //     await AsyncStorage.setItem('panier', shoppingCart)
-  //     console.log("je recup de la data", shopppingCart)
-  //   } catch (e) {
-  //     console.log(e)
-  //   }
-  // }
-
   render() {
-    console.log("cringe", this.props.cart);
+    console.log("price array");
     return (
       <React.Fragment>
         <View style={styles.inside_circle}>
           <View style={{ flexDirection: "row" }}>
-            <TouchableOpacity style={{ zIndex: 2 }} onPress={() => this.back()}>
-              <View>
-                <AntDesign
-                  name="arrowleft"
-                  size={30}
-                  color="white"
-                  style={{ paddingLeft: 20, marginTop: 29 }}
-                />
-              </View>
-            </TouchableOpacity>
             <Text
               style={{
                 zIndex: 2,
@@ -139,8 +197,9 @@ export default class Panier extends React.Component {
           source={require("../assets/treasure.png")}
         />
         <View style={styles.circle}></View>
+        <ScrollView>
         {this.cart_function()}
-       
+
         <View style={styles.total}>
           <Text
             style={{
@@ -161,9 +220,11 @@ export default class Panier extends React.Component {
               alignSelf: "center",
             }}
           >
-            120 €
+            {this.total()} €
           </Text>
         </View>
+        {this.Command()}
+        </ScrollView>
       </React.Fragment>
     );
   }
@@ -205,4 +266,5 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginTop: 12,
   },
+  commande: {},
 });

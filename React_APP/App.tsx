@@ -10,9 +10,11 @@ import Product from "./Component/Product";
 import Register from "./Component/auth/Register";
 import Login from "./Component/auth/Login";
 import Panier from "./Component/Panier";
-import Bluetooth from "./Component/Bluetooth";
+import Command from "./Component/Command";
 import { useReducer } from "react";
-
+import { SimpleLineIcons } from '@expo/vector-icons';
+import { Entypo } from "@expo/vector-icons";
+import { Ionicons } from '@expo/vector-icons';
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
@@ -91,15 +93,15 @@ export default class App extends React.Component {
           screenOptions={({ route }) => ({
             tabBarIcon: ({ focused, color, size }) => {
               let iconName;
-
-              if (route.name === "Home") {
-                iconName = focused ? "stepforward" : "verticleright";
-              } else if (route.name === "Settings") {
-                iconName = focused ? "caretup" : "leftcircle";
+              let SimpleLineIcons
+              if (route.name === "HomeStack") {
+                iconName = focused ? "home" : "home";
               } else if (route.name === "Panier") {
-                iconName = focused ? "caretup" : "leftcircle";
+                iconName = focused ? "shoppingcart" : "shoppingcart";
               }
-
+              else if (route.name === "Commmande") {
+                iconName = focused ? "creditcard" : "creditcard";
+              }
               // You can return any component that you like here!
               return <AntDesign name={iconName} size={size} color={color} />;
             },
@@ -112,7 +114,7 @@ export default class App extends React.Component {
           <Tab.Screen name="HomeStack" component={this.HomeStack} />
           {/* <Tab.Screen name="Settings" component={() => <Product {}  /> */}
           <Tab.Screen name="Panier" children={() => <Panier cart={this.state.cart} />} />
-          <Tab.Screen name="Bluetooth" component={() => <Bluetooth UnLogged={token => { this.setState({tokenAPP: token})}} />} />
+          <Tab.Screen name="Commmande" component={() => <Command UnLogged={token => { this.setState({tokenAPP: token})}} />} />
         </Tab.Navigator>
       );
     } else {
@@ -123,9 +125,9 @@ export default class App extends React.Component {
               let iconName;
 
               if (route.name === "Register") {
-                iconName = focused ? "stepforward" : "verticleright";
+                iconName = focused ? "addusergroup" : "addusergroup";
               } else if (route.name === "Login") {
-                iconName = focused ? "stepforward" : "verticleright";
+                iconName = focused ? "login" : "login";
               }
 
               // You can return any component that you like here!

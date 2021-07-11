@@ -24,10 +24,11 @@ const Product = (props) => {
   // }
   // const { id } = route.params;
   const [object_of_product, setObject] = useState({});
-  const [quantity, setQuantity] = useState(4);
+  const [quantity, setQuantity] = useState(1);
   const [ok, setOk] = useState("ok");
+ 
 
-  console.log(props)
+
   
   useEffect(() => {
     
@@ -39,8 +40,11 @@ const Product = (props) => {
   }, []);
 
   function onAddProduct(){
-    // setObject({...object_of_product, "test azerty": "jiji"});
+    object_of_product.quantity = quantity;
+    setObject(object_of_product);
+    //  setObject(object_of_product["quantity"] : quantity);
     // object_of_product.push("ok")
+     console.log("tableau test ", object_of_product);
     props.route.params.onAddProduct( object_of_product )
   }
 
@@ -63,7 +67,7 @@ const Product = (props) => {
   async function deleteToken() {
    try {
      await AsyncStorage.removeItem("token");
-     console.log("je sup de la data");
+    //  console.log("je sup de la data");
    } catch (e) {
      console.log(e);
    }
@@ -74,7 +78,7 @@ const Product = (props) => {
       const value = await AsyncStorage.getItem("token");
       if (value !== null) {
         setState({ tokenAPP: value });
-        console.log("getdata", tokenAPP);
+        // console.log("getdata", tokenAPP);
       }
     } catch (e) {
       // error reading value
@@ -139,7 +143,7 @@ const Product = (props) => {
             marginLeft: 20,
           }}
         >
-          4,99 €
+          {object_of_product.price} €
         </Text>
       </View>
       <View style={styles.circle}></View>
